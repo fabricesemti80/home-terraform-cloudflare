@@ -24,11 +24,11 @@ locals {
       port     = 9000
     },
     {
-      protocol = "http"
+      protocol = "https"
       name     = "nextcloud"
       host     = "localhost"
       hostname = "nextcloud.${var.cf_domain}"
-      port     = 88
+      port     = 10443
     }
   ]
 }
