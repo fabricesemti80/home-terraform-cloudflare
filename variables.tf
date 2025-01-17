@@ -1,8 +1,8 @@
 
 
 variable "cf_api_token" {
-  default = ""
-  type    = string
+  default   = ""
+  type      = string
   sensitive = true
 }
 
@@ -12,8 +12,8 @@ variable "cf_zone_id" {
 }
 
 variable "cf_account_id" {
-  default = ""
-  type    = string
+  default   = ""
+  type      = string
   sensitive = true
 }
 
@@ -27,10 +27,10 @@ variable "tunnel_id_docker" {
   type    = string
 
 }
-variable "tunnel_secret_docker" {
-  default = ""
-  type    = string
-  sensitive = true
+# variable "tunnel_secret" {
+#   default   = ""
+#   type      = string
+#   sensitive = true
 
-}
+# }
 

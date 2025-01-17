@@ -1,49 +1,55 @@
-# Define the tunnel resource
-#? Import it with "terraform import cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel ${TF_VAR_cf_account_id}/ea8ef032-4e1b-408d-ba6d-abd101a6d54c"
-#? $ terraform import cloudflare_zero_trust_tunnel_cloudflared.example <cf_account_id>/<tunnel_id>
-# Define the tunnel resource and import it
-resource "cloudflare_zero_trust_tunnel_cloudflared" "existing_tunnel" {
-  account_id = var.cf_account_id
-  name       = "docker-tunnel-new"
-  secret     = var.tunnel_secret_docker
+# Add this at the top of the file
+resource "random_password" "tunnel_secret" {
+  length  = 32
+  special = false
+  upper   = true
+  lower   = true
+  numeric = true
 }
-# Outputs for Cloudflare configuration
+
+resource "cloudflare_zero_trust_tunnel_cloudflared" "tunnel" {
+  account_id    = var.cf_account_id
+  name          = "terraformed-docker-tunnel"
+  tunnel_secret = random_password.tunnel_secret.result
+}
+
 output "tunnel_id" {
   description = "ID of the Cloudflare Tunnel"
-  value       = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.id
+  value       = cloudflare_zero_trust_tunnel_cloudflared.tunnel.id
 }
+
 output "tunnel_name" {
   description = "Name of the Cloudflare Tunnel"
-  value       = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.name
+  value       = cloudflare_zero_trust_tunnel_cloudflared.tunnel.name
 }
-output "credentials_json" {
-  description = "JSON credentials content for ~/.cloudflared/<TUNNEL_ID>.json"
-  sensitive   = true
-  value = jsonencode({
+
+
+
+resource "local_file" "tunnel_credentials" {
+  count = terraform.workspace == "default" ? 1 : 0 #! Add a condition to only create them when running locally using the terraform.workspace check
+  content = jsonencode({
     AccountTag   = var.cf_account_id
-    TunnelID     = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.id
-    TunnelName   = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.name
-    TunnelSecret = var.tunnel_secret_docker
+    TunnelID     = cloudflare_zero_trust_tunnel_cloudflared.tunnel.id
+    TunnelName   = cloudflare_zero_trust_tunnel_cloudflared.tunnel.name
+    TunnelSecret = random_password.tunnel_secret.result
   })
+  filename = pathexpand("~/.cloudflared/${cloudflare_zero_trust_tunnel_cloudflared.tunnel.id}.json")
 }
-# output "config_yaml" {
-#   description = "YAML configuration for ~/.cloudflared/config.yaml"
-#   value       = yamlencode({
-#     tunnel            = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.id
-#     credentials-file  = "~/.cloudflared/${cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.id}.json"
-#     ingress = [
-#       for domain in local.domains : {
-#         hostname = domain.hostname
-#         service  = "http://localhost:${domain.port}"
-#       },
-#       {
-#         service = "http_status:404" # Default catch-all rule
-#       }
-#     ]
-#   })s
+
+
+
+
+resource "local_file" "tunnel_config" {
+  count = terraform.workspace == "default" ? 1 : 0 #! Add a condition to only create them when running locally using the terraform.workspace check
+  content = yamlencode({
+    tunnel           = cloudflare_zero_trust_tunnel_cloudflared.tunnel.id
+    credentials-file = "~/.cloudflared/${cloudflare_zero_trust_tunnel_cloudflared.tunnel.id}.json"
+  })
+  filename = pathexpand("~/.cloudflared/config.yaml")
+}
+
+# output "tunnel_token" {
+#   description = "Tunnel token for cloudflared"
+#   sensitive   cloudflare_zero_trust_tunnel_cloudflared.tunnel.tunnel_token= true
+#   value       = 
 # }
-output "tunnel_token" {
-  description = "Tunnel token for cloudflared"
-  sensitive   = true
-  value       = cloudflare_zero_trust_tunnel_cloudflared.existing_tunnel.tunnel_token
-}
