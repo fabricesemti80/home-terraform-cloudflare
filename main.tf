@@ -207,7 +207,7 @@ resource "cloudflare_zero_trust_access_policy" "example_zero_trust_access_policy
 resource "cloudflare_zero_trust_access_application" "hass" {
   zone_id           = var.cf_zone_id
   name              = "Home Assistant"
-  domain            = var.hass_domain
+  domain            = "hass.${var.cf_domain}"
   type              = "self_hosted"
   session_duration  = "24h"
   skip_interstitial = true
@@ -220,7 +220,7 @@ resource "cloudflare_zero_trust_access_application" "hass" {
 resource "cloudflare_zero_trust_access_application" "atlantis" {
   zone_id           = var.cf_zone_id
   name              = "Atlantis"
-  domain            = "atlantis.fabricesemti.dev"
+  domain            = "atlantis.${var.cf_domain}"
   type              = "self_hosted"
   session_duration  = "24h"
   skip_interstitial = true
