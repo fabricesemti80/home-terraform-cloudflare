@@ -6,12 +6,12 @@ terraform {
     }
   }
 
-  # backend "remote" {
-  #   organization = "homelab-fsemti"
-  #   workspaces {
-  #     name = "homelab-fsemti"
-  #   }
-  # }
+  backend "remote" {
+    organization = "homelab-fsemti"
+    workspaces {
+      name = "homelab-fsemti"
+    }
+  }
 }
 
 # backend "remote" {
@@ -19,7 +19,7 @@ terraform {
 # 	workspaces {
 # 		name = "homelab-fsemti" # name for your app's state.
 # 	}
-# }  
+# }
 
 
 provider "cloudflare" {
