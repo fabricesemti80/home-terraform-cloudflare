@@ -6,12 +6,12 @@ terraform {
     }
   }
 
-  backend "remote" {
-    organization = "homelab-fsemti"
-    workspaces {
-      name = "homelab-fsemti"
-    }
-  }
+  # backend "remote" {
+  #   organization = "homelab-fsemti"
+  #   workspaces {
+  #     name = "homelab-fsemti"
+  #   }
+  # }
 }
 
 # backend "remote" {
